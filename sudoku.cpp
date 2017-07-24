@@ -2,7 +2,9 @@
 
 #include <iostream>
 #include <stdio.h>
+#include "soduko_boards.h"
 using namespace std;
+
 
 #define RED         "\033[31m"
 #define CYAN        "\033[36m"
@@ -10,7 +12,6 @@ using namespace std;
 #define BOLDYELLOW  "\033[1m\033[33m"
 #define RESET       "\033[0m"
 
-// 0 indexed
 struct SPOT
 {
   int row;
@@ -122,19 +123,6 @@ void print_spot_info()
   }
 }
 
-
-
-void create_correct_board()
-{
-  for (int r = 0; r < 9; r++)
-  {
-    for (int c = 0; c < 9; c++)
-    {
-      
-    }
-  }
-}
-
 // randomize the start of the game
 // the player chose easy mode
 // default
@@ -236,9 +224,6 @@ int main(void)
   cursor.col    = 0;
   cursor.num    = 0;
   cursor.valid  = 1;
-  
-  create_correct_board();
-  setup_board_easy();
   
   // initialize all spots on the board to be nothing to begin with
   for (int i = 0; i < 81; i++)
