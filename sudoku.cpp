@@ -4,9 +4,11 @@
 #include <stdio.h>
 using namespace std;
 
-#define RED   "\033[31m"
-#define CYAN  "\033[36m"
-#define RESET "\033[0m"
+#define RED         "\033[31m"
+#define CYAN        "\033[36m"
+#define BOLDWHITE   "\033[1m\033[37m"
+#define BOLDYELLOW  "\033[1m\033[33m"
+#define RESET       "\033[0m"
 
 // 0 indexed
 struct SPOT
@@ -17,6 +19,7 @@ struct SPOT
   bool valid;
 };
 
+SPOT correct_board_spots[81];
 SPOT current_board_spots[81];
 
 // clear the screen
@@ -30,17 +33,22 @@ void clear()
 void print_board(SPOT cursor)
 {
   cout << "\n\n\n\n";
-  cout << "\t ___ ___ ___ ___ ___ ___ ___ ___ ___ \n";
+  cout << "\t ___ ___ ___   ___ ___ ___   ___ ___ ___  \n";
   
   for (int r = 0; r < 9; r++)
   {
-    cout << "\t|   |   |   |   |   |   |   |   |   |\n";
+    cout << "\t|   |   |   | |   |   |   | |   |   |   |\n";
     cout << "\t";
     
     for (int c = 0; c < 9; c++)
     {
       if (current_board_spots[r*9 + c].num == 0)
       {
+        if (c == 3 || c == 6)
+        {
+          cout << "| ";
+        }
+        
         if (cursor.row == r && cursor.col == c)
         {
           cout << "| " << CYAN << ". " << RESET;
@@ -55,6 +63,11 @@ void print_board(SPOT cursor)
       
       else
       {
+        if (c == 3 || c == 6)
+        {
+          cout << "| ";
+        }
+      
         if (cursor.row == r && cursor.col == c)
         {
           cout << "| " << CYAN << current_board_spots[r*9 + c].num << RESET << " ";
@@ -72,8 +85,14 @@ void print_board(SPOT cursor)
       }
     }
     
+    
     cout << "|\n";
-    cout << "\t|___|___|___|___|___|___|___|___|___|\n";
+    cout << "\t|___|___|___| |___|___|___| |___|___|___|\n";
+    
+    if ((r+1)%3 == 0 && r != 8)
+    {
+      cout << "\t ___ ___ ___   ___ ___ ___   ___ ___ ___ \n";
+    }
   }
   
   cout << "\n\n";
@@ -103,8 +122,22 @@ void print_spot_info()
   }
 }
 
+
+
+void create_correct_board()
+{
+  for (int r = 0; r < 9; r++)
+  {
+    for (int c = 0; c < 9; c++)
+    {
+      
+    }
+  }
+}
+
 // randomize the start of the game
 // the player chose easy mode
+// default
 void setup_board_easy()
 {
 }
@@ -204,6 +237,9 @@ int main(void)
   cursor.num    = 0;
   cursor.valid  = 1;
   
+  create_correct_board();
+  setup_board_easy();
+  
   // initialize all spots on the board to be nothing to begin with
   for (int i = 0; i < 81; i++)
   {
@@ -212,6 +248,7 @@ int main(void)
     current_board_spots[i].num    = 0;
     current_board_spots[i].valid  = true;
   }
+  
   
   print_board(cursor);
   print_commands();
