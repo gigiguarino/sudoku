@@ -15,6 +15,9 @@ using namespace std;
 //////////////////////////////////////
 #define RED         "\033[31m"
 #define CYAN        "\033[36m"
+#define YELLOW      "\033[33m"
+#define MAGENTA     "\033[35m"
+#define GREEN       "\033[32m"
 #define BOLDWHITE   "\033[1m\033[37m"
 #define BOLDYELLOW  "\033[1m\033[33m"
 #define RESET       "\033[0m"
@@ -85,11 +88,11 @@ void clear()
 void print_board(SPOT cursor, vector<SPOT> spots)
 {
   cout << "\n\n\n\n";
-  cout << "\t ___ ___ ___   ___ ___ ___   ___ ___ ___  \n";
+  cout << GREEN << "\t ___ ___ ___   ___ ___ ___   ___ ___ ___  \n" << RESET;
   
   for (int r = 0; r < 9; r++)
   {
-    cout << "\t|   |   |   | |   |   |   | |   |   |   |\n";
+    cout << GREEN << "\t|   |   |   | |   |   |   | |   |   |   |\n" << RESET;
     cout << "\t";
     
     for (int c = 0; c < 9; c++)
@@ -98,17 +101,17 @@ void print_board(SPOT cursor, vector<SPOT> spots)
       {
         if (c == 3 || c == 6)
         {
-          cout << "| ";
+          cout << GREEN << "| " << RESET;
         }
         
         if (cursor.row == r && cursor.col == c)
         {
-          cout << "| " << CYAN << ". " << RESET;
+          cout << GREEN << "| "<< RESET << BOLDYELLOW << "+ " << RESET;
         }
         
         else
         {
-          cout << "|   ";
+          cout << GREEN << "|   " << RESET;
         }
         
       }
@@ -117,33 +120,33 @@ void print_board(SPOT cursor, vector<SPOT> spots)
       {
         if (c == 3 || c == 6)
         {
-          cout << "| ";
+          cout << GREEN << "| " << RESET;
         }
       
         if (cursor.row == r && cursor.col == c)
         {
-          cout << "| " << CYAN << spots[r*9 + c].num << RESET << " ";
+          cout << GREEN << "| " << RESET << BOLDYELLOW << spots[r*9 + c].num << RESET << " ";
         }
         
         else if (!spots[r*9 + c].valid)
         {
-          cout << "| " << RED << spots[r*9 + c].num << RESET << " ";
+          cout << GREEN << "| " << RESET << RED << spots[r*9 + c].num << RESET << " ";
         }
         
         else
         {
-          cout << "| " << spots[r*9 + c].num << " ";
+          cout << GREEN << "| " << RESET << spots[r*9 + c].num << " ";
         }
       }
     }
     
     
-    cout << "|\n";
-    cout << "\t|___|___|___| |___|___|___| |___|___|___|\n";
+    cout << GREEN << "|\n" << RESET;
+    cout << GREEN << "\t|___|___|___| |___|___|___| |___|___|___|\n" << RESET;
     
     if ((r+1)%3 == 0 && r != 8)
     {
-      cout << "\t ___ ___ ___   ___ ___ ___   ___ ___ ___ \n";
+      cout << GREEN << "\t ___ ___ ___   ___ ___ ___   ___ ___ ___ \n" << RESET;
     }
   }
   
@@ -160,13 +163,13 @@ void print_board(SPOT cursor, vector<SPOT> spots)
 //////////////////////////////////////
 void print_commands()
 {
-  cout << "\t" << "w\t\t- move cursor up\n";
-  cout << "\t" << "a\t\t- move cursor left\n";
-  cout << "\t" << "s\t\t- move cursor down\n";
-  cout << "\t" << "d\t\t- move cursor right\n";
-  cout << "\t" << "0\t\t- clear number\n";
-  cout << "\t" << "1-9\t\t- place number\n";
-  cout << "\t" << "q\t\t- quit\n\n\n";
+  cout << "\t   " << "w\t\t- move cursor up\n";
+  cout << "\t   " << "a\t\t- move cursor left\n";
+  cout << "\t   " << "s\t\t- move cursor down\n";
+  cout << "\t   " << "d\t\t- move cursor right\n";
+  cout << "\t   " << "0\t\t- clear number\n";
+  cout << "\t   " << "1-9\t\t- place number\n";
+  cout << "\t   " << "q\t\t- quit\n\n\n";
 }
 
 //////////////////////////////////////
@@ -630,6 +633,87 @@ void handle_input(char input, SPOT &cursor)
 
 
 
+
+
+
+
+
+
+
+//////////////////////////////////////
+// make sure each square has at
+// least 2 spots filled in
+// also no unreasonably full squares
+//////////////////////////////////////
+void check(int beg_row, int end_row, int beg_col,
+  int end_col, vector<SPOT> &spots)
+{
+  int num_spots = 0;
+  for (int r = beg_row; r <= end_row; r++)
+  {
+    for (int c = beg_col; c <= end_col; c++)
+    {
+      if (spots[r*9 + c].num != 0)
+      {
+        num_spots++;
+      }
+    }
+  }
+  
+  if (num_spots < 2)
+  {
+    spots[beg_row*9 + beg_col].num = correct_board_spots[beg_row*9 + beg_col].num;
+    spots[end_row*9 + end_col].num = correct_board_spots[end_row*9 + end_col].num;
+  }
+  
+  else if (num_spots >= 7)
+  {
+    spots[beg_row*9 + beg_col].num = 0;
+    spots[end_row*9 + end_col].num = 0;
+    spots[end_row*9 + beg_col].num = 0;
+  }
+}
+
+
+//////////////////////////////////////
+// remove_spots(spots)
+// removes numbers off of the board
+//////////////////////////////////////
+void remove_spots(vector<SPOT> &spots, int num_spots)
+{
+  int num;
+  
+  // make a number of the spots null or 0
+  for (int i = 0; i < num_spots; i++)
+  {
+    num = rand() % spots.size();
+    if (spots[num].num != 0)
+    {
+      spots[num].num = 0;
+    }
+    else
+    {
+      i--;
+    }
+  }
+  
+  // make sure every square at least has two
+  // and less than 7
+  check(0,2,0,2, spots);
+  check(0,2,3,5, spots);
+  check(0,2,6,8, spots);
+  check(3,5,0,2, spots);
+  check(3,5,3,5, spots);
+  check(3,5,6,8, spots);
+  check(6,8,0,2, spots);
+  check(6,8,3,5, spots);
+  check(6,8,6,8, spots);
+}
+
+
+
+
+
 int main(void)
 {
   srand(time(NULL));
@@ -657,8 +741,9 @@ int main(void)
   generate_correct();
   current_board_spots = correct_board_spots;
   
-  // !!!!! TODO
+  
   // remove some numbers from current board spots
+  remove_spots(current_board_spots, 45);
 
   bool quit = false;
   char input;
