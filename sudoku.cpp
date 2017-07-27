@@ -1,7 +1,11 @@
 
 
 #include <iostream>
+#include <iterator>
+#include <algorithm>
+#include <random>
 #include <deque>
+#include <vector>
 #include <stdio.h>
 using namespace std;
 
@@ -35,6 +39,18 @@ struct SPOT
   }
 };
 
+
+//////////////////////////////////////
+// correct board and current board
+// for comparison
+//////////////////////////////////////
+vector<SPOT> current_board_spots;
+vector<SPOT> correct_board_spots;
+
+
+//////////////////////////////////////
+// print spot
+//////////////////////////////////////
 void print_spot(SPOT s)
 {
   cout << "-----\n";
@@ -46,12 +62,9 @@ void print_spot(SPOT s)
 }
 
 
-//////////////////////////////////////
-// correct board and current board
-// for comparison
-//////////////////////////////////////
-SPOT correct_board_spots[81];
-SPOT current_board_spots[81];
+
+
+
 
 
 
@@ -69,7 +82,7 @@ void clear()
 // print_board(cursor)
 // print the current board
 //////////////////////////////////////
-void print_board(SPOT cursor, SPOT spots[])
+void print_board(SPOT cursor, vector<SPOT> spots)
 {
   cout << "\n\n\n\n";
   cout << "\t ___ ___ ___   ___ ___ ___   ___ ___ ___  \n";
@@ -112,7 +125,7 @@ void print_board(SPOT cursor, SPOT spots[])
           cout << "| " << CYAN << spots[r*9 + c].num << RESET << " ";
         }
         
-        else if (!current_board_spots[r*9 + c].valid)
+        else if (!spots[r*9 + c].valid)
         {
           cout << "| " << RED << spots[r*9 + c].num << RESET << " ";
         }
@@ -137,6 +150,10 @@ void print_board(SPOT cursor, SPOT spots[])
   cout << "\n\n";
 }
 
+
+
+
+
 //////////////////////////////////////
 // print_commands()
 // prints commands for the user
@@ -156,7 +173,7 @@ void print_commands()
 // print_spot_info()
 // for debugging purposes
 //////////////////////////////////////
-void print_spot_info(SPOT spots[])
+void print_spot_info(vector<SPOT> spots)
 {
   for (int i = 0; i < 81; i++)
   {
@@ -166,45 +183,52 @@ void print_spot_info(SPOT spots[])
          << " n: "  << spots[i].num
          << " v: "  << spots[i].valid << "\n";
   }
+  
+  cout << "---------" << endl;
 }
 
-void print_deque(deque<SPOT> spots)
+//////////////////////////////////////
+// print_deque(spots, name)
+// for debugging purposes
+//////////////////////////////////////
+void print_vec(vector<SPOT> spots, string name)
 {
   for (int i = 0; i < spots.size(); i++)
   {
-    cout << "deque[" << i << "]:"
+    cout <<  name << "[" << i << "]:"
          << " r: "  << spots[i].row
          << " c: "  << spots[i].col
          << " n: "  << spots[i].num
          << " v: "  << spots[i].valid << "\n";
   }
-}
-
-void print_deque(deque<int> spots)
-{
-  for (int i = 0; i < spots.size(); i++)
-  {
-    cout << spots[i] << endl;
-  }
+  
+  cout << "---------" << endl;
 }
 
 
 
+
+
+//////////////////////////////////////
 // randomize the start of the game
 // the player chose easy mode
-// default
+//////////////////////////////////////
 void setup_board_easy()
 {
 }
 
+//////////////////////////////////////
 // randomize the start of the game
 // the player chose medium mode
+//////////////////////////////////////
 void setup_board_medium()
 {
 }
 
+//////////////////////////////////////
 // randomize the start of the game
 // the player chose hard mode
+//////////////////////////////////////
 void setup_board_hard()
 {
 }
@@ -219,10 +243,8 @@ void setup_board_hard()
 // returns true if there is
 // already that number in the row
 //////////////////////////////////////
-bool in_row(SPOT s, SPOT spots[])
+bool in_row(SPOT s, vector<SPOT> spots)
 {
-  int row = s.row;
-  
   for (int c = 0; c < 9; c++)
   {
     if ((spots[s.row*9 + c].num == s.num) &&
@@ -240,7 +262,7 @@ bool in_row(SPOT s, SPOT spots[])
 // returns true if there is
 // already that number in the col
 //////////////////////////////////////
-bool in_col(SPOT s, SPOT spots[])
+bool in_col(SPOT s, vector<SPOT> spots)
 {
   int col = s.col;
   
@@ -261,7 +283,7 @@ bool in_col(SPOT s, SPOT spots[])
 // returns true if there is already
 // that number in the square
 //////////////////////////////////////
-bool in_square(SPOT s, SPOT spots[])
+bool in_square(SPOT s, vector<SPOT> spots)
 {
   int row = s.row;
   int col = s.col;
@@ -343,7 +365,7 @@ bool in_square(SPOT s, SPOT spots[])
 // loops through spots
 // and checks validity
 //////////////////////////////////////
-void check_placement(SPOT spots[])
+void check_placement(vector<SPOT> &spots)
 {
   SPOT s;
   
@@ -367,111 +389,158 @@ void check_placement(SPOT spots[])
 
 
 
-
-
-
-
-
-
-void remove_from_snapshot(SPOT s, deque<SPOT> &d_s)
+//////////////////////////////////////
+// struct to hold backtraces
+//////////////////////////////////////
+struct BT
 {
-  for (int i = 0; i < d_s.size(); i++)
-  {
-    if (d_s[i] == s)
-    {
-      d_s.erase(d_s.begin() + i);
-      return;
-    }
-  }
-  
-  cout << "error" << endl;
-  return;
-}
+  int row;
+  int col;
+  int num;
+  vector<int> num_to_try;
+};
 
+vector<BT> backtrack_vec;
+
+//////////////////////////////////////
+// print_bt()
+// for debugging
+//////////////////////////////////////
+void print_bt()
+{
+  for (int i = 0; i < backtrack_vec.size(); i++)
+  {
+    cout << "backtrack[" << i << "]: "
+         << "r:" << backtrack_vec[i].row << " "
+         << "c:" << backtrack_vec[i].col << " "
+         << "n:" << backtrack_vec[i].num << endl;
+  }
+}
 
 //////////////////////////////////////
 // generate_correct()
 // generate correct sudoku board
 //////////////////////////////////////
-void generate_correct(SPOT cursor)
+void generate_correct()
 {
-  deque<int> spots_to_place; // grab randomly and erase
-  deque<SPOT> spot_stack; // push front / pop front
-  deque<SPOT> left_to_try;
-  deque<SPOT> left_to_try_snapshot;
+  random_device rd;
+  mt19937 g(rd());
+
+  bool done = false;
+  bool go_back = false;
+  bool placed = false;
   
-  SPOT current;
-  for (int r = 0; r < 9; r++)
-  {
-    for (int c = 0; c < 9; c++)
-    {
-      current.row = r;
-      current.col = c;
-      current.num = 0;
-      current.valid = true;
-      left_to_try.push_back(current);
-      left_to_try_snapshot.push_back(current);
-    }
-  }
-  
-  for (int i = 1; i < 9; i++)
-  {
-    for (int j = 0; j < 9; j++)
-    {
-      spots_to_place.push_back(i);
-    }
-  }
+  vector<int> numbers;
+  vector<int> current_numbers;
   
   SPOT current_spot;
-  int current_num;
-  int random;
-  bool placed;
+  BT current_bt;
+  vector<SPOT> current_board;
+
+  current_board = correct_board_spots;
+
+  // so we can reset
+  numbers.push_back(1);
+  numbers.push_back(2);
+  numbers.push_back(3);
+  numbers.push_back(4);
+  numbers.push_back(5);
+  numbers.push_back(6);
+  numbers.push_back(7);
+  numbers.push_back(8);
+  numbers.push_back(9);
   
-  while (!spots_to_place.empty())
+  // fill in first row with 1-9 randomly placed
+  // to speed up generation of solution
+  current_numbers = numbers;
+  shuffle(current_numbers.begin(), current_numbers.end(), g);
+  int i = 0;
+  while (!current_numbers.empty())
   {
-    cout << endl << endl << endl << endl << endl;
-    
-    current_num = spots_to_place.front();
-    left_to_try = left_to_try_snapshot;
-    
-    placed = false;
-    
-    while (!placed)
+    current_board[i].num = current_numbers.back();
+    current_numbers.pop_back();
+    i++;
+  }
+
+  // get new numbers and shuffle
+  // starting at top of second row try first
+  int row = 1;
+  int col = 0;
+  while (!done)
+  {
+    if (go_back)
     {
-      //print_deque(left_to_try);
-      random = rand() % left_to_try.size();
-      current_spot = left_to_try[random];
-      current_spot.num = current_num;
+      // backtrack
+      current_bt = backtrack_vec.back();
+      backtrack_vec.pop_back();
+      current_spot.row = current_bt.row;
+      current_spot.col = current_bt.col;
+      current_numbers = current_bt.num_to_try;
+      shuffle(current_numbers.begin(), current_numbers.end(), g);
+      row = current_spot.row;
+      col = current_spot.col;
+      current_board[row*9 + col].num = 0;
+      placed = false;
+      go_back = false;
+    }
+    
+    else
+    {
+      current_numbers = numbers;
+      shuffle(current_numbers.begin(), current_numbers.end(), g);
+      current_spot.row = row;
+      current_spot.col = col;
+      placed = false;
+    }
+    
+    // try all of remaining numbers for validity
+    while (!placed && !current_numbers.empty())
+    {
+      current_spot.num = current_numbers.back();
+      current_numbers.pop_back();
       
-      left_to_try.erase(left_to_try.begin()+random);
-      
-      if (!in_row(current_spot, correct_board_spots) &&
-          !in_col(current_spot, correct_board_spots) &&
-          !in_square(current_spot, correct_board_spots))
+      if (!in_row(current_spot, current_board) &&
+          !in_col(current_spot, current_board) &&
+          !in_square(current_spot, current_board))
       {
+        current_bt.row = current_spot.row;
+        current_bt.col = current_spot.col;
+        current_bt.num = current_spot.num;
+        current_bt.num_to_try = current_numbers;
+        backtrack_vec.push_back(current_bt);
+        current_board[row*9 + col].num = current_spot.num;
         placed = true;
-        spots_to_place.pop_front();
-        spot_stack.push_front(current_spot);
-        correct_board_spots[current_spot.row*9 + current_spot.col] = current_spot;
-        print_spot(current_spot);
-        remove_from_snapshot(current_spot, left_to_try_snapshot);
+      }
+    }
+    
+    // valid spot
+    if (placed)
+    {
+      if (row == 8 && col == 8)
+      {
+        done = true;
+      }
+      
+      else if (col == 8)
+      {
+        row++;
+        col = 0;
       }
       
       else
       {
-        if (left_to_try.empty())
-        {
-          cout << "HERE" << endl;
-          left_to_try_snapshot.push_front(spot_stack.front());
-          correct_board_spots[spot_stack.front().row*9 + spot_stack.front().col].num = 0;
-          spots_to_place.push_front(spot_stack.front().num);
-          spot_stack.pop_front();
-          placed = true;
-        }
+        col++;
       }
+    }
+    
+    // backtrack
+    if (!placed && current_numbers.empty())
+    {
+      go_back = true;
     }
   }
   
+  correct_board_spots = current_board;
 }
 
 
@@ -563,43 +632,11 @@ void handle_input(char input, SPOT &cursor)
 
 int main(void)
 {
+  srand(time(NULL));
+
   // initialize cursor
   SPOT cursor;
-  cursor.row    = 0;
-  cursor.col    = 0;
-  cursor.num    = 0;
-  cursor.valid  = 1;
-  
-  for (int i = 0; i < 81; i++)
-  {
-    correct_board_spots[i].row    = i/9;
-    correct_board_spots[i].col    = i%9;
-    correct_board_spots[i].num    = 0;
-    correct_board_spots[i].valid  = true;
-  }
-  
-  generate_correct(cursor);
-  print_board(cursor, correct_board_spots);
-  print_spot_info(correct_board_spots);
-}
-
-
-
-
-
-/*
-
-
-//////////////////////////////////////
-// main
-//////////////////////////////////////
-int main(void)
-{
-  bool quit = false;
-  char input;
-  
-  // initialize cursor
-  SPOT cursor;
+  SPOT current_spot;
   cursor.row    = 0;
   cursor.col    = 0;
   cursor.num    = 0;
@@ -608,11 +645,23 @@ int main(void)
   // initialize all spots on the board to be nothing to begin with
   for (int i = 0; i < 81; i++)
   {
-    current_board_spots[i].row    = i/9;
-    current_board_spots[i].col    = i%9;
-    current_board_spots[i].num    = 0;
-    current_board_spots[i].valid  = true;
+    current_spot.row    = i/9;
+    current_spot.col    = i%9;
+    current_spot.num    = 0;
+    current_spot.valid  = true;
+    correct_board_spots.push_back(current_spot);
+    current_board_spots.push_back(current_spot);
   }
+  
+  // create solution
+  generate_correct();
+  current_board_spots = correct_board_spots;
+  
+  // !!!!! TODO
+  // remove some numbers from current board spots
+
+  bool quit = false;
+  char input;
   
   print_board(cursor, current_board_spots);
   print_commands();
@@ -623,6 +672,7 @@ int main(void)
     check_placement(current_board_spots);
     print_board(cursor, current_board_spots);
     print_commands();
+    //print_spot_info(current_board_spots);
     
     // arrow key check
     // set terminal to raw mode?
@@ -644,4 +694,4 @@ int main(void)
 
   return 0;
 }
-*/
+
