@@ -707,7 +707,7 @@ bool check_if_done()
 
 void start()
 {
-  srand(time(0));
+  srand(time(NULL));
   
   cout << RESET << endl;
 
