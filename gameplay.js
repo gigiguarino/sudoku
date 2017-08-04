@@ -6,7 +6,9 @@ var start_board_spots = [];
 var cursor_row;
 var cursor_col;
 
-
+$(document).ready(function(){
+	start();
+});
 
 /////////////////////////////////////////////
 // check_square(#) check_row(#) check_col(#)
@@ -101,7 +103,7 @@ function check_row(num) {
 }
 
 function check_col(num) {
-	vvar current_name;
+	var current_name;
 	var spot;
 	var num_spots;
 	var valid = true;
@@ -293,7 +295,7 @@ function generate_board(){
 	var backtrack_rows = [];
 	var backtrack_cols = [];
 	var backtrack_nums = [];
-	var backtrack_nums_to_try = [][];
+	var backtrack_nums_to_try = [];
 
 	var done = false;
 	var go_back = false;
@@ -301,7 +303,10 @@ function generate_board(){
 
 	while (current_numbers.length != 0)
 	{
-		shuffle(current_numbers);
+		if (current_numbers.length > 1)
+		{
+			shuffle(current_numbers);
+		}
 		num = current_numbers.pop();
 		correct_board_spots[current_numbers.length] = num;
 	}
@@ -319,7 +324,6 @@ function generate_board(){
 			current_num = backtrack_nums.pop();
 			row = backtrack_rows.pop();
 			col = backtrack_cols.pop();
-			shuffle(current_numbers);
 			correct_board_spots[row*9 + col] = 0;
 			placed = false;
 			go_back = false;
@@ -358,7 +362,7 @@ function generate_board(){
 				done = true;
 			}
 
-			else if ()
+			else if (col == 8)
 			{
 				row++;
 				col = 0;
@@ -376,8 +380,6 @@ function generate_board(){
 			go_back = true;
 		}
 	}
-
-	start_board_spots = current_board_spots;
 }
 
 
@@ -391,88 +393,87 @@ function generate_board(){
 // and numbers, letters
 /////////////////////////////////////////////
 
-$('html').keydown(function(e){
-		if (e.keyCode == 37)
+$(document).on('keydown', function(e) {
+	if (e.keyCode == 37)
+	{
+		// left
+		if (cursor_col != 0)
 		{
-			// left
-			if (cursor_col != 0)
-			{
-				cursor_col--;
-			}
+			cursor_col--;
 		}
-		else if (e.keyCode == 38)
+	}
+	else if (e.keyCode == 38)
+	{
+		// up
+		if (cursor_row != 0)
 		{
-			// up
-			if (cursor_row != 0)
-			{
-				cursor_row--;
-			}
+			cursor_row--;
 		}
-		else if (e.keyCode == 39)
+	}
+	else if (e.keyCode == 39)
+	{
+		// right
+		if (cursor_col != 8)
 		{
-			// right
-			if (cursor_col != 8)
-			{
-				cursor_col++;
-			}
+			cursor_col++;
 		}
-		else if (e.keyCode == 40)
+	}
+	else if (e.keyCode == 40)
+	{
+		// down
+		if (cursor_row != 8)
 		{
-			// down
-			if (cursor_row != 8)
-			{
-				cursor_col++;
-			}
+			cursor_col++;
 		}
-		else if (e.keyCode == 82)
+	}
+	else if (e.keyCode == 82)
+	{
+		// reset board
+		current_board_spots = start_board_spots;
+		if (check_for_win())
 		{
-			// reset board
-			current_board_spots = start_board_spots;
-			if (check_for_win())
-			{
-				win();
-			}
+			win();
 		}
-		else if (e.keyCode == 78)
+	}
+	else if (e.keyCode == 78)
+	{
+		// new board
+		generate_board();
+		if (check_for_win())
 		{
-			// new board
-			generate_board();
-			if (check_for_win())
-			{
-				win();
-			}
+			win();
 		}
-		else if (e.keyCode == 48)
+	}
+	else if (e.keyCode == 48)
+	{
+		// clear spot
+		current_board_spots[cursor_row*9 + cursor_col] = 0;
+		if (check_for_win())
 		{
-			// clear spot
-			current_board_spots[cursor_row*9 + cursor_col] = 0;
-			if (check_for_win())
-			{
-				win();
-			}
+			win();
 		}
-		else if (e.keyCode > 48 && e.keyCode < 58)
+	}
+	else if (e.keyCode > 48 && e.keyCode < 58)
+	{
+		// number
+		current_board_spots[cursor_row*9 + cursor_col] = e.keyCode - 48;
+		if (check_for_win())
 		{
-			// number
-			current_board_spots[cursor_row*9 + cursor_col] = e.keyCode - 48;
-			if (check_for_win())
-			{
-				win();
-			}
+			win();
+		}
 
-		}
-		else if (e.keyCode == 81)
+	}
+	else if (e.keyCode == 81)
+	{
+		// give up
+		// show correct solution
+		current_board_spots = correct_board_spots;
+		if (check_for_win())
 		{
-			// give up
-			// show correct solution
-			current_board_spots = correct_board_spots;
-			if (check_for_win())
-			{
-				win();
-			}
+			win();
 		}
-    });
-}
+	}
+})
 
 
 /////////////////////////////////////////////

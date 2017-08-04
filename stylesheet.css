@@ -1,0 +1,41 @@
+
+
+body {
+	background-color: #dcf2dc;
+}
+
+.board {
+	display: block;
+	position: fixed;
+	border-style: solid;
+	border-width: 15px;
+	border-color: #95bf95;
+	font-size: 0px;
+	text-align: center;
+	width: 600px;
+	height: 600px;
+	top: 50%;
+	left: 50%;
+	margin-top: -315px;
+	margin-left: -315px;
+}
+
+.square {
+	display: inline-block;
+	border-style: solid;
+	border-width: 5px;
+	border-color: #a8d4a8;
+	width: 190px;
+	height: 190px;
+	font-size: 0px;
+}
+
+.box {
+	display: inline-block;
+	width: 53.3333333333px;
+	height: 53.333333333px;
+	border-style: solid;
+	border-width: 5px;
+	border-color: #95bf95;
+	font-size: 12px;
+}
