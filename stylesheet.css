@@ -4,6 +4,13 @@ body {
 	background-color: #dcf2dc;
 }
 
+.logo {
+	position: fixed;
+	z-index: 200;
+	left: 0px;
+	bottom: 0px;
+}
+
 .board {
 	display: block;
 	position: fixed;
@@ -32,6 +39,7 @@ body {
 
 .box {
 	display: inline-block;
+	background-color: #e5fce5;
 	width: 53.3333333333px;
 	height: 53.333333333px;
 	border-style: solid;
@@ -42,4 +50,5 @@ body {
 	vertical-align: middle;
 	line-height: 53.333333333px;
 	font-color: black;
+	font-family: monospace;
 }
