@@ -1,5 +1,9 @@
 
 
+var INVALID_COLOR = "red";
+var VALID_COLOR = "green";
+var NUM_BOARDS = 400;
+
 var current_board_spots = [];
 var correct_board_spots = [];
 var start_board_spots = [];
@@ -7,8 +11,42 @@ var cursor_row;
 var cursor_col;
 
 $(document).ready(function(){
+	zeroize_board();
 	start();
 });
+
+
+
+/////////////////////////////////////////////
+// fill_board()
+// fills the spots of the board
+// with the values from current_board_spots
+/////////////////////////////////////////////
+
+function fill_board() {
+	var current_row;
+	var current_col;
+	var current_class = "";
+	for (i = 0; i < 81; i++)
+	{
+		current_row = Math.floor(i/9);
+		current_col = i%9;
+		current_row += 1;
+		current_col += 1;
+		current_class = ".r" + current_row.toString() + 
+						".c" + current_col.toString();
+		$(current_class).text(current_board_spots[i]);
+	}
+}
+
+function zeroize_board() {
+	for (i = 0; i < 81; i++)
+	{
+		current_board_spots.push("0");
+	}
+}
+
+
 
 /////////////////////////////////////////////
 // check_square(#) check_row(#) check_col(#)
@@ -43,7 +81,7 @@ function check_square(num) {
 			$(current_name).each(function(){
 			if ($(this).val() == num)
 			{
-				// change to red
+				$(this).css("color", INVALID_COLOR);
 			}
 		});
 		}
@@ -52,7 +90,7 @@ function check_square(num) {
 			$(current_name).each(function(){
 			if ($(this).val() == num)
 			{
-				// change to black
+				$(this).css("color", VALID_COLOR);
 			}
 		});
 		}
@@ -85,7 +123,7 @@ function check_row(num) {
 			$(current_name).each(function(){
 			if ($(this).val() == num)
 			{
-				// change to red
+				$(this).css("color", INVALID_COLOR);
 			}
 		});
 		}
@@ -94,7 +132,7 @@ function check_row(num) {
 			$(current_name).each(function(){
 			if ($(this).val() == num)
 			{
-				// change to black
+				$(this).css("color", VALID_COLOR);
 			}
 		});
 		}
@@ -127,7 +165,7 @@ function check_col(num) {
 			$(current_name).each(function(){
 			if ($(this).val() == num)
 			{
-				// change to red
+				$(this).css("color", INVALID_COLOR);
 			}
 		});
 		}
@@ -136,7 +174,7 @@ function check_col(num) {
 			$(current_name).each(function(){
 			if ($(this).val() == num)
 			{
-				// change to black
+				$(this).css("color", VALID_COLOR);
 			}
 		});
 		}
@@ -194,9 +232,9 @@ function win(){
 /////////////////////////////////////////////
 
 function in_row(num, row, col){
-	for (i = 0; i < row; i++)
+	for (i = 0; i <= row; i++)
 	{
-		if (correct_board_spots[i*9 + col] == num)
+		if (current_board_spots[i*9 + col] == num)
 		{
 			return true;
 		}
@@ -205,9 +243,9 @@ function in_row(num, row, col){
 }
 
 function in_col(num, row, col){
-	for (i = 0; i < col; i++)
+	for (i = 0; i <= col; i++)
 	{
-		if (correct_board_spots[row*9 + i] == num)
+		if (current_board_spots[row*9 + i] == num)
 		{
 			return true;
 		}
@@ -262,7 +300,7 @@ function in_square(num, row, col){
 	{
 		for (c = small_c; c <= big_c; c++)
 		{
-			if (correct_board_spots[r*9 + c] == num)
+			if (current_board_spots[r*9 + c] == num)
 			{
 				return true;
 			}
@@ -272,117 +310,30 @@ function in_square(num, row, col){
 	return false;
 }
 
-function shuffle(a){
-    var j, x, i;
-    for (i = a.length; i; i--) {
-        j = Math.floor(Math.random() * i);
-        x = a[i - 1];
-        a[i - 1] = a[j];
-        a[j] = x;
-    }
-}
+
 
 /////////////////////////////////////////////
 // generate_board()
-// creates starting board
 /////////////////////////////////////////////
 
-function generate_board(){
-	var numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-	var current_numbers = numbers;
-	var num;
+function generate_board() {
 
-	var backtrack_rows = [];
-	var backtrack_cols = [];
-	var backtrack_nums = [];
-	var backtrack_nums_to_try = [];
+	// random number between 0 and NUM_BOARDS
+	var num = Math.floor(Math.random() * (NUM_BOARDS));
+	var url = "boards/" + num.toString() + ".txt";
 
-	var done = false;
-	var go_back = false;
-	var placed = false;
-
-	while (current_numbers.length != 0)
-	{
-		if (current_numbers.length > 1)
-		{
-			shuffle(current_numbers);
+	$.ajax({
+	type: "GET",
+    url: url,
+    success: function (data){
+      	for (i = 0; i < 81; i++)
+      	{
+      		current_board_spots[i] = data[i];
 		}
-		num = current_numbers.pop();
-		correct_board_spots[current_numbers.length] = num;
-	}
-
-	var row = 1;
-	var col = 0;
-	var current_num;
-
-	while (!done)
-	{
-		if (go_back)
-		{
-			// backtrack
-			current_numbers = backtrack_nums_to_try.pop();
-			current_num = backtrack_nums.pop();
-			row = backtrack_rows.pop();
-			col = backtrack_cols.pop();
-			correct_board_spots[row*9 + col] = 0;
-			placed = false;
-			go_back = false;
-		}
-
-		else
-		{
-			current_numbers = numbers;
-			shuffle(current_numbers);
-			placed = false;
-		}
-
-		// try all of remaining numbers
-		while (!placed && current_numbers.length != 0)
-		{
-			current_num = current_numbers.pop();
-			// check row
-			if (!in_row(current_num, row, col) &&
-				!in_col(current_num, row, col) &&
-				!in_square(current_num, row, col))
-			{
-				backtrack_cols.push(col);
-				backtrack_rows.push(row);
-				backtrack_nums.push(current_num);
-				backtrack_nums_to_try.push(current_numbers);
-				correct_board_spots[row*9 + col] = current_num;
-				placed = true;
-			}
-		}
-
-		// valid spot
-		if (placed)
-		{
-			if (row == 8 && col == 8)
-			{
-				done = true;
-			}
-
-			else if (col == 8)
-			{
-				row++;
-				col = 0;
-			}
-
-			else 
-			{
-				col++;
-			}
-		}
-
-		// backtrack
-		if (!placed && current_numbers.length == 0)
-		{
-			go_back = true;
-		}
-	}
+		fill_board();
+    }
+  	});
 }
-
-
 
 
 
