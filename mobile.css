@@ -1,0 +1,12 @@
+
+body {
+	background-color: #eeeeee;
+	font-family: monospace;
+	color: #3e3e3e;
+	visibility: hidden;
+}
+
+.mobile {
+	visibility: visible;
+}
+
