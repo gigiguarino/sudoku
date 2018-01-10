@@ -5,23 +5,41 @@ var INVALID_COLOR = "red";
 var VALID_COLOR = "#3e3e3e";
 var NORMAL_FONT = "#3e3e3e";
 var DARK_FONT = "black";
-var DARK_BG = "#c5e2c5";
-var LIGHT_BG = "#ebfdeb";
-var NUM_BOARDS = 600;
-
-
+var DARK_BG = "#fdc680";
+var LIGHT_BG = "#ffd7a4";
+var NUM_BOARDS = 800;
 
 // global arrays of spots
 var current_board_spots = [];
 var correct_board_spots = [];
 var start_board_spots = [];
 var current_active_spot;
+var difficulty;
 
+// speech bubble globals
+var speech_bubble_out;
+var current_speech_bubble_type;
+var other_speech_bubble_types = [ "hi", "smiley" ];
+var NUM_TYPES = 2;
 
 $(document).ready(function(){
 	errors_shown = 0;
+	difficulty = "easy";
+
 	zeroize_board();
 	generate_board();
+
+	// difficulties
+	$("input[name=difficulty]").on("change", function() {
+		difficulty = $(this).val();
+		new_board();
+	});
+
+	// logo speech bubble init
+	current_speech_bubble_type = "title";
+	speech_bubble_out = true;
+	$(".logo").on("click", speech_bubble);
+
 	// set active box
 	$(".box").on("click", set_active);
 	// hover over buttons
@@ -103,7 +121,6 @@ function zeroize_board() {
 		correct_board_spots.push("0");
 	}
 }
-
 
 /////////////////////////////////////////////
 // in_row() in_col() in_square()
@@ -204,8 +221,8 @@ function generate_board() {
 	while (num <= 0 || num > NUM_BOARDS)
 	{
 		num = Math.floor(Math.random() * (NUM_BOARDS));
-		url1 = "boards/correct/" + num.toString() + ".txt";
-		url2 = "boards/start/" + num.toString() + ".txt";
+		url1 = "boards/" + difficulty + "/correct/" + num.toString() + ".txt";
+		url2 = "boards/" + difficulty + "/start/" + num.toString() + ".txt";
 	}
 
 	$.ajax({
@@ -481,6 +498,40 @@ function popup(text) {
 	$(".popup").css("visibility", "visible");
 }
 
+
+function speech_bubble() {
+	var index = 0;
+	var filename = "images/speech_bubbles/";
+	if (speech_bubble_out)
+	{
+		$("#sb").css("visibility", "hidden");
+		speech_bubble_out = false;
+	}
+	else
+	{
+		// if last speech bubble type was title, do different random one
+		// if last speech bubble type wasn't title, do title
+		if (current_speech_bubble_type == "title")
+		{
+			$("#sb").attr("src", filename);
+			index = Math.floor(Math.random() * (NUM_TYPES));
+			current_speech_bubble_type = other_speech_bubble_types[index];
+			filename += current_speech_bubble_type + ".png";
+			$("#sb").css("visibility", "visible");
+			speech_bubble_out = true;
+		}
+		else
+		{
+			current_speech_bubble_type = "title";
+			filename += current_speech_bubble_type + ".png";
+			$("#sb").attr("src", filename);
+			$("#sb").css("visibility", "visible");
+			speech_bubble_out = true;
+		}
+	}
+}
+
+
 // numbers
 $(document).keyup(function(e){
 	// 48 = 0
@@ -500,6 +551,7 @@ $(document).keyup(function(e){
 		}
 	}
 });
+
 
 
 

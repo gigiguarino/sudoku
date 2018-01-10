@@ -1,17 +1,9 @@
 
 
 body {
-	background-color: #eeeeee;
+	background-color: #fde9cf;
 	font-family: monospace;
 	color: #3e3e3e;
-}
-
-.title {
-	display: block;
-	position: fixed;
-	top: -5px;
-	left: 10px;
-	z-index: -100px;
 }
 
 .mobile {
@@ -25,14 +17,22 @@ body {
 	bottom: 5px;
 }
 
+#sb {
+	position: fixed;
+	z-index: 500;
+	left: 100px;
+	bottom: 100px;
+}
+
+
 .game {
 	display: block;
-	width: 800px;
+	width: 900px;
 	height: 620px;
 	top: 50%;
 	left: 50%;
 	margin-top: -310px;
-	margin-left: -400px;
+	margin-left: -450px;
 	position: fixed;
 }
 
@@ -51,24 +51,32 @@ body {
 	display: inline-block;
 	border-style: solid;
 	border-width: 5px;
-	border-color: #a8d4a8;
+	border-color: #3e3e3e;
 	width: 190px;
 	height: 190px;
 	font-size: 0px;
+	background-color: #3e3e3e;
 }
 
 .box {
 	display: inline-block;
-	background-color: #ebfdeb;
-	width: 53.3333333333px;
-	height: 53.333333333px;
+	background-color: #efefef;
+	width: 53.3px;
+	height: 53.3px;
 	border-style: solid;
 	border-width: 5px;
-	border-color: #95bf95;
+	border-color: #3e3e3e;
 	font-size: 20px;
 	text-align: center;
 	vertical-align: middle;
-	line-height: 53.333333333px;
+	line-height: 53.3px;
+}
+
+.difficulty {
+	display: inline-block;
+	float: left;
+	width: 100px;
+	height: 60px;
 }
 
 .buttons {
@@ -80,7 +88,7 @@ body {
 
 .button {
 	display: block;
-	background-color: #ebfdeb;
+	background-color: #ffd7a4;
 	border-color: #3e3e3e;
 	
 	border-style: solid;
@@ -136,3 +144,5 @@ body {
 	left: 50%;
 	margin-left: -40px;
 }
+
+
